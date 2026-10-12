@@ -136,8 +136,11 @@ try:
     wait("Implementation model", mark)
     mark = send("\r")
     wait("Approve exact plan revision", mark)
-    send("\x1b")
-    time.sleep(0.2)
+    mark = send("j")  # Explicit No; do not depend on lone-Escape timing across PTYs.
+    wait("→ No", mark)
+    send("\r")
+    for _ in range(6):
+        pump()
     assert not (workspace / "result.txt").exists()
 
     mark = command("/plan implement")
