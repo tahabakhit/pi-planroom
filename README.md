@@ -27,13 +27,13 @@ Planroom is a standalone [Pi](https://github.com/earendil-works/pi) extension. I
 From the public Git repository:
 
 ```sh
-pi install git:github.com/tahabakhit/pi-planroom@v1.0.0
+pi install git:github.com/tahabakhit/pi-planroom
 ```
 
-From [npm](https://www.npmjs.com/package/pi-planroom), pinned to this release:
+From [npm](https://www.npmjs.com/package/pi-planroom):
 
 ```sh
-pi install npm:pi-planroom@1.0.0
+pi install npm:pi-planroom
 ```
 
 Or try a checkout for one invocation without changing configured packages:
