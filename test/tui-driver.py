@@ -22,6 +22,7 @@ if pid == 0:
     env = dict(os.environ, TERM="xterm-256color")
     os.execvpe(sys.argv[1], sys.argv[1:], env)
 
+os.set_blocking(fd, False)
 buffer = ""
 decoder = codecs.getincrementaldecoder("utf-8")("replace")
 
@@ -38,6 +39,8 @@ def pump(timeout=0.05):
     if select.select([fd], [], [], timeout)[0]:
         try:
             data = os.read(fd, 65536)
+        except BlockingIOError:
+            return
         except OSError as error:
             if error.errno == errno.EIO:
                 raise RuntimeError("Pi terminal exited unexpectedly")
@@ -47,6 +50,7 @@ def pump(timeout=0.05):
         buffer += decoder.decode(data)
 
 def wait(text, start=0):
+    print("PTY waiting:", text, file=sys.stderr, flush=True)
     deadline = time.monotonic() + 20
     while time.monotonic() < deadline:
         if text in plain(buffer[start:]):
@@ -160,7 +164,14 @@ finally:
             time.sleep(0.05)
         else:
             os.kill(pid, signal.SIGTERM)
-            os.waitpid(pid, 0)
+            deadline = time.monotonic() + 2
+            while time.monotonic() < deadline:
+                if os.waitpid(pid, os.WNOHANG)[0]:
+                    break
+                time.sleep(0.05)
+            else:
+                os.kill(pid, signal.SIGKILL)
+                os.waitpid(pid, 0)
     except (ProcessLookupError, ChildProcessError, OSError):
         pass
     os.close(fd)

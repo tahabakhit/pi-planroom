@@ -29,17 +29,17 @@ jobs:
         env:
           QUALIFIED: ${{ inputs.provider_qualified }}
         run: test "$QUALIFIED" = true
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
           registry-url: https://registry.npmjs.org
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - name: Validate release identity
@@ -58,7 +58,7 @@ jobs:
       - run: npm run pack:check
       - run: npm run qualify:package
       - run: npm pack --ignore-scripts
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: npm-package
           path: pi-planroom-*.tgz
