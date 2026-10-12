@@ -1,0 +1,44 @@
+{
+  "name": "pi-planroom",
+  "version": "1.0.0",
+  "description": "Reviewable planning, revision-bound approval, and reliable implementation handoff for Pi.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22.19.0" },
+  "keywords": ["pi-package", "planning", "coding-agent"],
+  "repository": { "type": "git", "url": "https://github.com/tahabakhit/pi-planroom.git" },
+  "homepage": "https://github.com/tahabakhit/pi-planroom#readme",
+  "bugs": { "url": "https://github.com/tahabakhit/pi-planroom/issues" },
+  "files": ["src", "docs", "README.md", "LICENSE", "SECURITY.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+  "pi": { "extensions": ["src/index.ts"] },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": ">=1.1.0 <2.0.0",
+    "@earendil-works/pi-coding-agent": ">=1.1.0 <2.0.0",
+    "@earendil-works/pi-tui": ">=1.1.0 <2.0.0",
+    "typebox": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-ai": { "optional": true },
+    "@earendil-works/pi-coding-agent": { "optional": true },
+    "@earendil-works/pi-tui": { "optional": true },
+    "typebox": { "optional": true }
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.1.0",
+    "@earendil-works/pi-coding-agent": "1.1.0",
+    "@earendil-works/pi-tui": "1.1.0",
+    "@types/node": "^22.20.0",
+    "typebox": "^1.0.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/unit/*.test.ts test/integration/*.test.ts test/acceptance/*.test.ts",
+    "test:unit": "node --test test/unit/*.test.ts",
+    "check": "npm run typecheck && npm test",
+    "pack:check": "npm pack --dry-run",
+    "qualify:package": "node scripts/qualify-package.ts",
+    "qualify:live": "node scripts/qualify-live.ts",
+    "prepublishOnly": "npm run check && npm run pack:check && npm run qualify:package"
+  }
+}

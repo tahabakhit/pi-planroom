@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible, sanitized Planroom problem
+title: '[Bug]: '
+body:
+  - type: markdown
+    attributes:
+      value: Do not upload private plans, credentials, or complete session transcripts. For security-sensitive reports, use the security policy instead.
+  - type: input
+    id: versions
+    attributes:
+      label: Package / Pi / Node versions and platform
+    validations:
+      required: true
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Interface
+      options:
+        - TUI
+        - RPC
+        - Print / JSON
+        - SDK
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps and expected / actual behavior
+      description: Use a small disposable fixture, and say whether any operation was still in flight.
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Sanitized errors and recovery state
+      description: Remove project names, personal paths, secrets, and provider credentials.

@@ -1,0 +1,72 @@
+name: Release package
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Exact qualified release tag, such as v1.0.0
+        required: true
+        type: string
+      provider_qualified:
+        description: I deliberately ran provider-backed qualification against this exact release tree
+        required: true
+        default: false
+        type: boolean
+      publish:
+        description: Publish to npm using the release environment's npm authority
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+jobs:
+  release:
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require explicit provider qualification attestation
+        env:
+          QUALIFIED: ${{ inputs.provider_qualified }}
+        run: test "$QUALIFIED" = true
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate release identity
+        env:
+          TAG: ${{ inputs.tag }}
+        run: node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(fs.readFileSync("package.json","utf8")); if(process.env.TAG !== `v${p.version}`) throw new Error("Tag and package version differ");'
+      - name: Require a successful full CI matrix for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export RELEASE_SHA="$(git rev-parse HEAD)"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" -f head_sha="$RELEASE_SHA" -f status=success > "$RUNNER_TEMP/planroom-ci.json"
+          node --input-type=module -e 'import fs from "node:fs"; const data=JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/planroom-ci.json`,"utf8")); if(!data.workflow_runs.some(r=>r.head_sha===process.env.RELEASE_SHA && r.conclusion==="success")) throw new Error("This release commit has no successful CI matrix");'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm run pack:check
+      - run: npm run qualify:package
+      - run: npm pack --ignore-scripts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: pi-planroom-*.tgz
+          if-no-files-found: error
+      - name: Publish explicitly authorized npm release
+        if: inputs.publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          test -n "$NODE_AUTH_TOKEN" || { echo "No npm publication authority configured"; exit 1; }
+          npm publish --access public --provenance
