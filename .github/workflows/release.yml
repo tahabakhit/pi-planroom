@@ -38,7 +38,8 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          registry-url: https://registry.npmjs.org
+      - name: Use the qualified trusted-publishing npm client
+        run: npm install --global npm@11.20.0 --ignore-scripts --no-audit --no-fund
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
@@ -63,10 +64,8 @@ jobs:
           name: npm-package
           path: pi-planroom-*.tgz
           if-no-files-found: error
-      - name: Publish explicitly authorized npm release
+      - name: Publish explicitly authorized npm release through trusted publishing
         if: inputs.publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          test -n "$NODE_AUTH_TOKEN" || { echo "No npm publication authority configured"; exit 1; }
-          npm publish --access public --provenance
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_URL" && test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" || { echo "No GitHub OIDC publication authority available"; exit 1; }
+          npm publish --access public --provenance --registry=https://registry.npmjs.org

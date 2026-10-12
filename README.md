@@ -30,10 +30,10 @@ From the public Git repository:
 pi install git:github.com/tahabakhit/pi-planroom@v1.0.0
 ```
 
-When the package is available on npm:
+From [npm](https://www.npmjs.com/package/pi-planroom), pinned to this release:
 
 ```sh
-pi install npm:pi-planroom
+pi install npm:pi-planroom@1.0.0
 ```
 
 Or try a checkout for one invocation without changing configured packages:
